@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Clientes Cadastrados</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cor-primaria: #007bff;
+      --cor-clara: #f0f2f5;
+      --cor-fundo: #ffffff;
+      --cor-texto: #333;
+      --cor-borda: #ccc;
+      --cor-sombra: rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(120deg, #dbe9f4, #f0f2f5);
+      color: var(--cor-texto);
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.4s, color 0.4s;
+    }
+
+    .navbar {
+      background-color: var(--cor-primaria);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .navbar h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .navbar .links {
+      display: flex;
+      gap: 15px;
+    }
+
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    .navbar input[type="search"] {
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 50px auto;
+      padding: 25px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px var(--cor-sombra);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--cor-primaria);
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background-color: var(--cor-primaria);
+      color: white;
+      text-align: left;
+    }
+
+    tr:hover {
+      background-color: #f1f9ff;
+    }
+
+    input {
+      width: 95%;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: var(--cor-primaria);
+      outline: none;
+    }
+
+    .btn {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+
+    .edit { background-color: #ffc107; }
+    .edit:hover { background-color: #e0a800; }
+
+    .save { background-color: #28a745; }
+    .save:hover { background-color: #218838; }
+
+    .delete { background-color: #dc3545; }
+    .delete:hover { background-color: #c82333; }
+
+    .msg {
+      text-align: center;
+      font-weight: bold;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .success { background-color: #d4edda; color: #155724; }
+    .error { background-color: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>Embalando 🟦</h1>
+    <div class="links">
+      <a href="index.html">🏠 Início</a>
+      <a href="produtos.html">📦 Produtos</a>
+      <a href="clientes.html">👥 Clientes</a>
+      <a href="compras.html">🧾 Compras</a>
+    </div>
+    <input type="search" placeholder="🔍 Pesquisar..." aria-label="Pesquisar">
+  </div>
+
+  <div class="container">
+    <h1>Clientes Cadastrados</h1>
+    <div id="mensagem" class="msg" style="display:none;"></div>
+
+    <table id="tabelaClientes">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Telefone</th>
+          <th>Endereço</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const baseUrl = "http://localhost:8080/clientes";
+
+    function exibirMensagem(texto, tipo) {
+      const div = document.getElementById("mensagem");
+      div.textContent = texto;
+      div.className = `msg ${tipo}`;
+      div.style.display = "block";
+      setTimeout(() => div.style.display = "none", 3000);
+    }
+
+    function carregarClientes() {
+      fetch(baseUrl)
+        .then(res => res.json())
+        .then(clientes => {
+          const tbody = document.querySelector("#tabelaClientes tbody");
+          tbody.innerHTML = "";
+
+          clientes.forEach(cliente => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${cliente.id}</td>
+              <td><input type="text" id="nome-${cliente.id}" value="${cliente.nome}" disabled required></td>
+              <td><input type="text" id="telefone-${cliente.id}" value="${cliente.telefone}" disabled required pattern="\\(\\d{2}\\)\\s\\d{5}-\\d{4}"></td>
+              <td><input type="text" id="endereco-${cliente.id}" value="${cliente.endereco}" disabled required></td>
+              <td>
+                <button class="btn edit" onclick="habilitarEdicao(${cliente.id})">Editar</button>
+                <button class="btn save" onclick="salvar(${cliente.id})" style="display:none">Salvar</button>
+                <button class="btn delete" onclick="deletar(${cliente.id})">Excluir</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    function habilitarEdicao(id) {
+      ["nome", "telefone", "endereco"].forEach(campo => {
+        document.getElementById(`${campo}-${id}`).disabled = false;
+      });
+      document.querySelector(`button.edit[onclick="habilitarEdicao(${id})"]`).style.display = "none";
+      document.querySelector(`button.save[onclick="salvar(${id})"]`).style.display = "inline-block";
+    }
+
+    function salvar(id) {
+      const nome = document.getElementById(`nome-${id}`).value.trim();
+      const telefone = document.getElementById(`telefone-${id}`).value.trim();
+      const endereco = document.getElementById(`endereco-${id}`).value.trim();
+
+      if (!nome || !telefone || !endereco) {
+        exibirMensagem("Preencha todos os campos corretamente.", "error");
+        return;
+      }
+
+      fetch(`${baseUrl}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome, telefone, endereco })
+      })
+      .then(resp => {
+        if (resp.ok) {
+          exibirMensagem("Cliente atualizado com sucesso!", "success");
+          carregarClientes();
+        } else {
+          exibirMensagem("Erro ao atualizar cliente.", "error");
+        }
+      });
+    }
+
+    function deletar(id) {
+      if (confirm("Tem certeza que deseja excluir este cliente?")) {
+        fetch(`${baseUrl}/${id}`, { method: "DELETE" })
+          .then(resp => {
+            if (resp.ok) {
+              exibirMensagem("Cliente excluído com sucesso!", "success");
+              carregarClientes();
+            } else {
+              exibirMensagem("Erro ao excluir cliente.", "error");
+            }
+          });
+      }
+    }
+
+    carregarClientes();
+  </script>
+</body>
+</html>

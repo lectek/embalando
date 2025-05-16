@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cadastro de Cliente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --cor-primaria: #007bff;
+      --cor-clara: #f0f4f9;
+      --cor-fundo: #ffffff;
+      --cor-texto: #333;
+      --cor-borda: #ccc;
+    }
+
+    [data-tema="dark"] {
+      --cor-clara: #121212;
+      --cor-fundo: #1e1e1e;
+      --cor-texto: #f0f0f0;
+      --cor-borda: #444;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background-color: var(--cor-clara);
+      color: var(--cor-texto);
+      padding: 30px;
+      margin: 0;
+      transition: background-color 0.4s, color 0.4s;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: var(--cor-fundo);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--cor-primaria);
+      margin-bottom: 10px;
+    }
+
+    .tema-toggle {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: var(--cor-primaria);
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      margin-bottom: 15px;
+      border: 1px solid var(--cor-borda);
+      border-radius: 8px;
+      font-size: 16px;
+      background-color: var(--cor-fundo);
+      color: var(--cor-texto);
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: var(--cor-primaria);
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--cor-primaria);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #mensagem {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body data-tema="light">
+  <div class="container">
+    <div class="logo" aria-label="Logo da Embalando">Embalando 🟦</div>
+
+    <div class="tema-toggle">
+      <button onclick="alternarTema()" aria-label="Alternar tema claro/escuro">🌙 Alternar Tema</button>
+    </div>
+
+    <h2>Cadastro de Cliente</h2>
+
+    <form id="formCliente" aria-label="Formulário de cadastro de cliente">
+      <label for="nome">Nome:</label>
+      <input type="text" id="nome" required aria-required="true">
+
+      <label for="telefone">Telefone:</label>
+      <input type="text" id="telefone" required placeholder="(83) 91234-5678" pattern="\\(\\d{2}\\) \\d{5}-\\d{4}" aria-required="true">
+
+      <label for="endereco">Endereço:</label>
+      <input type="text" id="endereco" required aria-required="true">
+
+      <button type="submit">Cadastrar Cliente</button>
+    </form>
+
+    <div id="mensagem" role="alert" aria-live="polite"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById("formCliente");
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const nome = document.getElementById("nome").value.trim();
+      const telefone = document.getElementById("telefone").value.trim();
+      const endereco = document.getElementById("endereco").value.trim();
+
+      if (!nome || !telefone || !endereco) {
+        mostrarMensagem("❌ Preencha todos os campos corretamente.", "error");
+        return;
+      }
+
+      const cliente = { nome, telefone, endereco };
+
+      fetch("http://localhost:8080/clientes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cliente)
+      })
+      .then(response => {
+        if (response.ok) {
+          mostrarMensagem("✅ Cliente cadastrado com sucesso!", "success");
+          form.reset();
+        } else {
+          mostrarMensagem("❌ Erro ao cadastrar cliente.", "error");
+        }
+      })
+      .catch(() => {
+        mostrarMensagem("❌ Erro ao conectar com o servidor.", "error");
+      });
+    });
+
+    function mostrarMensagem(texto, tipo) {
+      const div = document.getElementById("mensagem");
+      div.innerText = texto;
+      div.className = tipo;
+      div.style.display = "block";
+      setTimeout(() => {
+        div.style.display = "none";
+        div.className = "";
+      }, 4000);
+    }
+
+    function alternarTema() {
+      const body = document.body;
+      body.dataset.tema = body.dataset.tema === "dark" ? "light" : "dark";
+    }
+  </script>
+</body>
+</html>

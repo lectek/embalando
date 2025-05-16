@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Embalando - Início</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --cor-primaria: #007bff;
+      --cor-fundo: #f0f2f5;
+      --cor-card: #ffffff;
+      --cor-hover: #e8f0fe;
+      --cor-titulo: #222;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f2f5, #dbe9f4);
+      color: var(--cor-titulo);
+    }
+
+    header {
+      background-color: var(--cor-primaria);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .login {
+      text-align: center;
+      margin: 40px auto 20px;
+    }
+
+    .login select, .login input, .login button {
+      font-size: 16px;
+      padding: 10px 14px;
+      margin: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      min-width: 200px;
+    }
+
+    .login button {
+      background-color: var(--cor-primaria);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    .login button:hover {
+      background-color: #0056b3;
+    }
+
+    #menu {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 30px auto 60px;
+      max-width: 1200px;
+    }
+
+    .card {
+      background-color: var(--cor-card);
+      border-radius: 12px;
+      padding: 30px 20px;
+      margin: 15px;
+      width: 250px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, background 0.3s;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      background-color: var(--cor-hover);
+      transform: translateY(-5px);
+    }
+
+    .card a {
+      text-decoration: none;
+      color: var(--cor-primaria);
+      font-weight: bold;
+      display: block;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .card i {
+      font-size: 36px;
+      color: var(--cor-primaria);
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        width: 80%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <i class="fas fa-box"></i> Embalando • Sistema de Controle 🟦
+  </header>
+
+  <div class="login">
+    <label for="tipo">Tipo de acesso:</label><br>
+    <select id="tipo" onchange="mostrarCampoSenha()">
+      <option value="cliente">Cliente</option>
+      <option value="admin">Administrador</option>
+    </select><br>
+
+    <div id="senhaDiv" style="display:none;">
+      <input type="password" id="senha" placeholder="Senha do administrador">
+    </div>
+
+    <br>
+    <button onclick="carregarMenu()"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+  </div>
+
+  <div id="menu"></div>
+
+  <script>
+    const menus = {
+      cliente: [
+        { texto: "Visualizar Produtos", link: "produtos.html", icone: "fa-box" },
+        { texto: "Cadastrar Compra", link: "cadastro-compra.html", icone: "fa-cart-plus" },
+        { texto: "Minhas Compras", link: "compras.html", icone: "fa-receipt" }
+      ],
+      admin: [
+        { texto: "Cadastrar Produto", link: "cadastro-produto.html", icone: "fa-plus-square" },
+        { texto: "Cadastrar Cliente", link: "cadastro-cliente.html", icone: "fa-user-plus" },
+        { texto: "Lista de Produtos", link: "produtos.html", icone: "fa-boxes-stacked" },
+        { texto: "Lista de Clientes", link: "clientes.html", icone: "fa-users" },
+        { texto: "Lista de Compras", link: "compras.html", icone: "fa-file-invoice-dollar" }
+      ]
+    };
+
+    function mostrarCampoSenha() {
+      const tipo = document.getElementById("tipo").value;
+      document.getElementById("senhaDiv").style.display = tipo === "admin" ? "block" : "none";
+    }
+
+    function carregarMenu() {
+      const tipo = document.getElementById("tipo").value;
+      const senha = document.getElementById("senha").value;
+
+      if (tipo === "admin" && senha !== "123456") {
+        alert("❌ Senha incorreta para administrador.");
+        return;
+      }
+
+      const menuDiv = document.getElementById("menu");
+      menuDiv.innerHTML = "";
+
+      menus[tipo].forEach(item => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <i class="fas ${item.icone}"></i>
+          <a href="${item.link}">${item.texto}</a>
+        `;
+        menuDiv.appendChild(card);
+      });
+    }
+  </script>
+</body>
+</html>

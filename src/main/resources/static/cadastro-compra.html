@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cadastro de Compra - Embalando</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnH2N2bWUvG9gLDPzN9fYO9vK9Zsv6p3EXH/fI5WxAnM4qvJ4lWY+Z5fUzjXnZKxL1qkZ8zYw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    :root {
+      --azul: #007bff;
+      --azul-hover: #0056b3;
+      --cinza-claro: #f2f5f9;
+      --branco: #fff;
+      --borda: #ddd;
+      --texto: #333;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--cinza-claro);
+      margin: 0;
+    }
+
+    header {
+      background-color: var(--azul);
+      color: white;
+      padding: 16px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 {
+      font-size: 24px;
+      margin: 0;
+    }
+
+    nav a {
+      color: white;
+      margin-left: 20px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      background-color: var(--branco);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      width: 100%;
+      max-width: 700px;
+      margin: 40px auto;
+      animation: fadeIn 0.4s ease;
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--texto);
+      margin-bottom: 25px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 15px;
+      display: block;
+      color: var(--texto);
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      margin-top: 6px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus {
+      border-color: var(--azul);
+      outline: none;
+    }
+
+    .produto-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background-color: #f9f9f9;
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .produto-item label {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .produto-item input[type="number"] {
+      width: 70px;
+      text-align: center;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--azul);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-top: 25px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: var(--azul-hover);
+    }
+
+    #total {
+      font-weight: bold;
+      font-size: 18px;
+      color: #155724;
+      margin-top: 20px;
+      text-align: center;
+      background-color: #d4edda;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .msg {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .success { background-color: #d4edda; color: #155724; }
+    .error { background-color: #f8d7da; color: #721c24; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><i class="fas fa-box"></i> Embalando</h1>
+    <nav>
+      <a href="/index.html">Início</a>
+      <a href="/clientes.html">Clientes</a>
+      <a href="/produtos.html">Produtos</a>
+      <a href="/compras.html">Compras</a>
+      <a href="/cadastro-compra.html">Nova Compra</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2>Cadastro de Compra</h2>
+
+    <form id="formCompra">
+      <label for="clienteId">ID do Cliente:</label>
+      <input type="number" id="clienteId" required>
+
+      <label for="descricao">Descrição:</label>
+      <input type="text" id="descricao" required>
+
+      <label>Produtos:</label>
+      <div id="produtosContainer"></div>
+
+      <div id="total">Total: R$ 0.00</div>
+
+      <button type="submit">Registrar Compra</button>
+    </form>
+
+    <div id="mensagem" class="msg" style="display:none;"></div>
+  </div>
+
+  <script>
+    let produtosDisponiveis = [];
+
+    function atualizarTotal() {
+      let total = 0;
+      document.querySelectorAll('.produto-item').forEach(item => {
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        const quantidadeInput = item.querySelector('input[type="number"]');
+        const preco = parseFloat(checkbox.dataset.preco);
+        const quantidade = parseInt(quantidadeInput.value);
+        if (checkbox.checked && !isNaN(quantidade)) {
+          total += quantidade * preco;
+        }
+      });
+      document.getElementById("total").innerText = `Total: R$ ${total.toFixed(2)}`;
+    }
+
+    function carregarProdutos() {
+      fetch("http://localhost:8080/produtos")
+        .then(resp => resp.json())
+        .then(produtos => {
+          produtosDisponiveis = produtos;
+          const container = document.getElementById("produtosContainer");
+          container.innerHTML = "";
+
+          produtos.forEach(p => {
+            const div = document.createElement("div");
+            div.className = "produto-item";
+            div.innerHTML = `
+              <label>
+                <input type="checkbox" name="produto" value="${p.id}" data-preco="${p.precoUnitario}" onchange="atualizarTotal()">
+                ${p.nome} — R$ ${p.precoUnitario.toFixed(2)}
+              </label>
+              <input type="number" name="quantidade-${p.id}" min="1" value="1" onchange="atualizarTotal()">
+            `;
+            container.appendChild(div);
+          });
+        });
+    }
+
+    document.getElementById("formCompra").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const clienteId = parseInt(document.getElementById("clienteId").value);
+      const descricao = document.getElementById("descricao").value;
+      const selecionados = [];
+
+      document.querySelectorAll('.produto-item').forEach(item => {
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        const quantidadeInput = item.querySelector('input[type="number"]');
+        if (checkbox.checked) {
+          const produtoId = parseInt(checkbox.value);
+          const quantidade = parseInt(quantidadeInput.value);
+          if (!isNaN(quantidade) && quantidade > 0) {
+            selecionados.push({ id: produtoId, quantidade });
+          }
+        }
+      });
+
+      if (selecionados.length === 0) {
+        mostrarMensagem("Selecione pelo menos um produto com quantidade válida.", "error");
+        return;
+      }
+
+      const body = {
+        clienteId,
+        descricao,
+        produtos: selecionados
+      };
+
+      fetch("http://localhost:8080/compras", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      })
+      .then(resp => {
+        if (resp.ok) {
+          mostrarMensagem("✅ Compra registrada com sucesso!", "success");
+          document.getElementById("formCompra").reset();
+          atualizarTotal();
+        } else {
+          mostrarMensagem("❌ Erro ao registrar a compra.", "error");
+        }
+      });
+    });
+
+    function mostrarMensagem(texto, tipo) {
+      const div = document.getElementById("mensagem");
+      div.innerText = texto;
+      div.className = `msg ${tipo}`;
+      div.style.display = "block";
+      setTimeout(() => div.style.display = "none", 3000);
+    }
+
+    carregarProdutos();
+  </script>
+</body>
+</html>
