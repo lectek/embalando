@@ -25,7 +25,7 @@ public class ProdutoService {
         return produtoRepository.findAll();
     }
 
-3    // Busca produto por ID (ou lança erro)
+    // Busca produto por ID (ou lança erro)
     public Produto buscarPorId(Long id) {
         return produtoRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Produto com ID " + id + " não encontrado."));
