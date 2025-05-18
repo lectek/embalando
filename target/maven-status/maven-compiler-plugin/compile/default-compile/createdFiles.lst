@@ -2,6 +2,10 @@ com\embalando\repository\ClienteRepository.class
 com\embalando\service\CompraService.class
 com\embalando\model\Produto.class
 com\embalando\model\Cliente.class
+<<<<<<< HEAD
+=======
+com\embalando\model\Cliente$ClienteBuilder.class
+>>>>>>> a30f203 (versão estavel com docker)
 com\embalando\model\Compra.class
 com\embalando\service\ClienteService.class
 com\embalando\service\ProdutoService.class

@@ -2,27 +2,32 @@ package com.embalando.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "compras")
 public class Compra {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String descricao;
+
     private double valor;
+
+    @Column(nullable = false)
     private LocalDate data;
 
-    // 🔗 Relação de volta com o Cliente (muitos para um)
+    // 🔗 Relação com Cliente (muitas compras para um cliente)
     @ManyToOne
-    @JoinColumn(name = "cliente_id")
+    @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 
     // 🔗 Relação com Produtos (uma compra tem vários produtos)
-    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "compra", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Produto> produtos = new ArrayList<>();
 
     // ✅ Construtores
@@ -73,22 +78,20 @@ public class Compra {
 
     public void setProdutos(List<Produto> produtos) {
         this.produtos = produtos;
-        calcularValorTotal(); // atualiza o valor automaticamente
+        calcularValorTotal();
     }
 
     // ✅ Adicionar produto individualmente e atualizar valor
     public void adicionarProduto(Produto produto) {
         this.produtos.add(produto);
-        calcularValorTotal(); // atualiza o valor automaticamente
+        produto.setCompra(this); // mantém bidirecionalidade
+        calcularValorTotal();
     }
 
-    // ✅ Calcular valor total com base nos produtos
-    public double calcularValorTotal(){
-        double total = produtos.stream()
-            .mapToDouble(p -> p.getQuantidade() * p.getPrecoUnitario())
-            .sum();
-        this.valor = total; // sincroniza com o campo
-        return total;
+    // ✅ Calcular valor total da compra
+    public void calcularValorTotal() {
+        this.valor = produtos.stream()
+                .mapToDouble(p -> p.getQuantidade() * p.getPrecoUnitario())
+                .sum();
     }
 }
-
